@@ -13,6 +13,17 @@ EMOJI_RE = re.compile("(<a?)?:\\w+:(\\d{18,19}>)?")
 EMOJI_ID_RE = re.compile("\\d{18,19}")
 
 
+class InvalidArgument(discord.errors.ClientException):
+    """Exception that's thrown when an argument to a function
+    is invalid some way (e.g. wrong value or wrong type).
+
+    This could be considered the analogous of ``ValueError`` and
+    ``TypeError`` except inherited from :exc:`ClientException` and thus
+    :exc:`DiscordException`.
+    """
+    pass
+
+
 class SmartReact(commands.Cog):
     """Create automatic reactions when trigger words are typed in chat."""
 
@@ -140,7 +151,7 @@ class SmartReact(commands.Cog):
             await self.conf.guild(guild).reactions.set(reactions)
             await message.channel.send("Successfully added this reaction.")
 
-        except (discord.errors.HTTPException, discord.errors.InvalidArgument):
+        except (discord.errors.HTTPException, InvalidArgument):
             await message.channel.send("That's not an emoji I recognize. " "(might be custom!)")
 
     async def remove_smart_reaction(self, guild, word, emoji, message):
@@ -158,7 +169,7 @@ class SmartReact(commands.Cog):
                     await message.channel.send("That emoji is not used as a reaction for that word.")
             else:
                 await message.channel.send("There are no smart reactions which use this emoji.")
-        except (discord.errors.HTTPException, discord.errors.InvalidArgument):
+        except (discord.errors.HTTPException, InvalidArgument):
             await message.channel.send("That's not an emoji I recognize. (might be custom!)")
 
     # Thanks irdumb#1229 for the help making this "more Pythonic"
@@ -181,7 +192,7 @@ class SmartReact(commands.Cog):
                     return
                 try:
                     await message.add_reaction(emoji)
-                except (discord.errors.Forbidden, discord.errors.InvalidArgument, discord.errors.NotFound):
+                except (discord.errors.Forbidden, InvalidArgument, discord.errors.NotFound):
                     pass
                 except discord.errors.HTTPException:
                     if emoji in reacts:
